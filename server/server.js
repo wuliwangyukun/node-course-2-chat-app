@@ -2,29 +2,25 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
+
 //拼接路径
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var {
+    generateMessage
+} = require('./utils/message');
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
 
-    socket.emit('newMessage', {
-        from: 'admin',
-        text: 'welcome to the chat app',
-        createAt: new Date().getTime()
-    })
+    socket.emit('newMessage', generateMessage('admin', 'welcome to the chat app'))
 
-    socket.broadcast.emit('newMessage', {
-        from: 'admin',
-        text: 'welcome admin join the chat room',
-        createAt: new Date().getTime()
-    })
+    socket.broadcast.emit('newMessage', generateMessage('admin', 'welcome admin join the chat room'))
 
     socket.on('createMessage', function (message) {
         // socket.broadcast给其他人发送事件(不包括自己)
