@@ -15,13 +15,31 @@ io.on('connection', (socket) => {
     console.log('New user connected');
 
     socket.emit('newMessage', {
-        from: 'michael',
-        text: 'what going on',
-        createAt: 123
+        from: 'admin',
+        text: 'welcome to the chat app',
+        createAt: new Date().getTime()
     })
 
-    socket.on('createMessage', function (data) {
-        console.log(data);
+    socket.broadcast.emit('newMessage', {
+        from: 'admin',
+        text: 'welcome admin join the chat room',
+        createAt: new Date().getTime()
+    })
+
+    socket.on('createMessage', function (message) {
+        // socket.broadcast给其他人发送事件(不包括自己)
+        // socket.broadcast.emit('newMessage', {
+        //     from: message.from,
+        //     text: message.text,
+        //     createAt: new Date().getTime()
+        // });
+
+        // io.emit会给所有连接的客户端发送事件(包括自己)
+        // io.emit('newMessage', {
+        //     from: message.from,
+        //     text: message.text,
+        //     createAt: new Date().getTime()
+        // })
     })
 
     socket.on('disconnect', () => {

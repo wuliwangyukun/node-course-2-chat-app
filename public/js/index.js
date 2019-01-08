@@ -5,10 +5,10 @@ socket.on('connected', function () {
 
 })
 
-socket.emit('createMessage', {
-    to: 'july@exeample.com',
-    text: 'hey',
-})
+// socket.emit('createMessage', {
+//     to: 'july@exeample.com',
+//     text: 'hey',
+// })
 
 socket.on('newMessage', function (data) {
     console.log('data', data);
