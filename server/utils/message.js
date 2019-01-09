@@ -1,7 +1,7 @@
-const generateMessage = function (from, message) {
+const generateMessage = function (from, text) {
     return {
         from,
-        message,
+        text,
         createAt: new Date().getTime()
     }
 }

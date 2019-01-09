@@ -22,7 +22,10 @@ io.on('connection', (socket) => {
 
     socket.broadcast.emit('newMessage', generateMessage('admin', 'welcome admin join the chat room'))
 
-    socket.on('createMessage', function (message) {
+    socket.on('createMessage', function (message, callback) {
+        console.log(message);
+
+        callback('this is from server')
         // socket.broadcast给其他人发送事件(不包括自己)
         // socket.broadcast.emit('newMessage', {
         //     from: message.from,
@@ -31,11 +34,11 @@ io.on('connection', (socket) => {
         // });
 
         // io.emit会给所有连接的客户端发送事件(包括自己)
-        // io.emit('newMessage', {
-        //     from: message.from,
-        //     text: message.text,
-        //     createAt: new Date().getTime()
-        // })
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createAt: new Date().getTime()
+        })
     })
 
     socket.on('disconnect', () => {
