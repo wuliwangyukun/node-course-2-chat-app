@@ -2,15 +2,11 @@ var socket = io();
 
 socket.on('connected', function () {
     console.log('connect to server');
-
 })
 
-// socket.emit('createMessage', {
-//     to: 'july@exeample.com',
-//     text: 'hey',
-// }, function (data) {
-//     console.log('Got it', data);
-// })
+socket.on('disconnected', function () {
+    console.log('disconnected from server');
+})
 
 socket.on('newMessage', function (message) {
     console.log('message', message);
@@ -19,17 +15,19 @@ socket.on('newMessage', function (message) {
     $('#messages').append(li)
 })
 
-socket.on('disconnected', function () {
-    console.log('disconnected from server');
-})
+// socket.emit('createMessage', {
+//     from: 'Frank',
+//     text: 'hi',
+// }, function (data) {
+//     console.log('Got it', data);
+// })
 
 $('#message-from').on('submit', function (e) {
     e.preventDefault();
     socket.emit('createMessage', {
-            from: 'User',
-            text: $('[name=message]').val()
-        },
-        function (data) {
-            console.log('Got it', data);
-        })
+        from: 'User',
+        text: $('[name=message]').val()
+    }, function () {
+
+    })
 })
