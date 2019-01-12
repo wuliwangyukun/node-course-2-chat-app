@@ -14,12 +14,37 @@ function scrollToBottom() {
     }
 }
 
-socket.on('connected', function () {
-    console.log('connect to server');
+socket.on('connect', function () {
+    let param = $.deparam(window.location.search);
+    console.log(socket);
+
+    socket.emit('join', {
+        name: param.name,
+        room: param.room
+    }, function (err) {
+        if (err) {
+            alert(err);
+            window.location.href = '/';
+        } else {
+            console.log('no error')
+        }
+    })
 })
 
 socket.on('disconnected', function () {
     console.log('disconnected from server');
+})
+
+socket.on('updateUserList', function (users) {
+    var ol = $('<ol></ol>');
+    var userList = document.createDocumentFragment();
+    users.forEach((user) => {
+        var li = document.createElement('li');
+        userList.appendChild(li);
+        li.appendChild(document.createTextNode(user));
+    });
+    ol.html(userList);
+    $('#users').html(ol);
 })
 
 socket.on('newMessage', function (message) {
@@ -30,11 +55,6 @@ socket.on('newMessage', function (message) {
         text: message.text,
         createAt: formattedTime
     })
-    // console.log('message', message);
-    // var li = $('<li></li>');
-    // li.text(`${message.from} ${formattedTime}: ${message.text}`);
-    // $('#messages').append(li)
-
     $('#messages').append(html)
     scrollToBottom();
 })
@@ -47,23 +67,8 @@ socket.on('newLocaltionMessage', (message) => {
         url: message.url,
         createAt: formattedTime
     })
-
-    // var li = $('<li></li>')
-    // var a = $('<a target="_blank">My Current Location</a>');
-    // li.text(`${message.from} ${formattedTime}:`);
-    // a.attr('href', message.url);
-    // li.append(a);
-    // $('#messages').append(li);
-
     $('#messages').append(html);
 })
-
-// socket.emit('createMessage', {
-//     from: 'Frank',
-//     text: 'hi',
-// }, function (data) {
-//     console.log('Got it', data);
-// })
 
 $('#message-from').on('submit', function (e) {
     e.preventDefault();

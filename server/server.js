@@ -14,42 +14,54 @@ var {
     generateMessage,
     generateLocationMessage
 } = require('./utils/message');
+var {
+    isReallyString,
+} = require('./utils/validation');
+var {
+    Users,
+} = require('./utils/users');
+
+var users = new Users()
 
 app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
 
-    socket.emit('newMessage', generateMessage('admin', 'welcome to the chat app'))
+    socket.on('join', function (params, callback) {
+        if (!isReallyString(params.name) || !isReallyString(params.room)) {
+            return callback('Name and room name are required')
+        }
 
-    socket.broadcast.emit('newMessage', generateMessage('admin', 'welcome admin join the chat room'))
+        socket.join(params.room);
+        //socket.leave('The office Fans');
+        users.removeUser(socket.id);
+        users.addUser(socket.id, params.name, params.room);
+
+        io.to(params.room).emit('updateUserList', users.getUserList(params.room))
+        socket.emit('newMessage', generateMessage('Admin', `welcome to the ${params.room}`));
+        socket.broadcast.to(params.room).emit('newMessage', generateMessage('Admin', `${params.name} joind`))
+        callback();
+    })
 
     socket.on('createMessage', function (message, callback) {
         console.log(message);
-
+        io.emit('newMessage', generateMessage(message.from, message.text));
         callback('this is from server')
-        // socket.broadcast给其他人发送事件(不包括自己)
-        // socket.broadcast.emit('newMessage', {
-        //     from: message.from,
-        //     text: message.text,
-        //     createAt: new Date().getTime()
-        // });
-
-        // io.emit会给所有连接的客户端发送事件(包括自己)
-        io.emit('newMessage', {
-            from: message.from,
-            text: message.text,
-            createAt: moment().valueOf()
-        })
     })
 
     socket.on('createdLocationMessage', function (coords) {
         console.log(coords);
-        socket.emit('newLocaltionMessage', generateLocationMessage('admin', coords.latitude, coords.longitude))
+        socket.emit('newLocaltionMessage', generateLocationMessage('A', coords.latitude, coords.longitude))
     })
 
     socket.on('disconnect', () => {
         console.log('user was disconnected');
+        var user = users.removeUser(socket.id);
+        if (user) {
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} has left`));
+        }
     })
 })
 
